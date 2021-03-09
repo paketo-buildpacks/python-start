@@ -15,9 +15,10 @@ import (
 
 func testDefault(t *testing.T, context spec.G, it spec.S) {
 	var (
-		Expect = NewWithT(t).Expect
-		pack   occam.Pack
-		docker occam.Docker
+		Expect     = NewWithT(t).Expect
+		Eventually = NewWithT(t).Eventually
+		pack       occam.Pack
+		docker     occam.Docker
 	)
 
 	it.Before(func() {
@@ -63,10 +64,25 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
-				"  Assigning launch processes",
-				`    web: python`,
+				"  Assigning launch process",
+				"    web: python",
 			))
-			// todo run container
+
+			container, err = docker.Container.Run.
+				WithTTY().
+				Execute(image.ID)
+			Expect(err).NotTo(HaveOccurred())
+
+			Eventually(func() string {
+				cLogs, err := docker.Container.Logs.Execute(container.ID)
+				Expect(err).NotTo(HaveOccurred())
+				return cLogs.String()
+			}).Should(
+				And(
+					MatchRegexp(`Python 3\.\d+\.\d+`),
+					ContainSubstring(`Type "help", "copyright", "credits" or "license" for more information.`),
+				),
+			)
 		})
 	})
 }

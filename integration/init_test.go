@@ -15,8 +15,7 @@ import (
 )
 
 var (
-	buildpack string
-	//	offlineBuildpack string
+	buildpack        string
 	cpythonBuildpack string
 
 	buildpackInfo struct {
@@ -60,12 +59,6 @@ func TestIntegration(t *testing.T) {
 	cpythonBuildpack, err = buildpackStore.Get.
 		Execute(config.Cpython)
 	Expect(err).NotTo(HaveOccurred())
-
-	// offlineBuildpack, err = buildpackStore.Get.
-	// 	WithOfflineDependencies().
-	// 	WithVersion("1.2.3").
-	// 	Execute(root)
-	// Expect(err).NotTo(HaveOccurred())
 
 	SetDefaultEventuallyTimeout(5 * time.Second)
 

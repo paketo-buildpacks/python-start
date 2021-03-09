@@ -1,11 +1,13 @@
 package pythonstart_test
 
 import (
-	"testing"
+	"bytes"
 	"io/ioutil"
 	"os"
+	"testing"
 
 	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/scribe"
 	pythonstart "github.com/paketo-community/python-start"
 	"github.com/sclevine/spec"
 
@@ -19,6 +21,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		layersDir  string
 		workingDir string
 		cnbDir     string
+		buffer     *bytes.Buffer
 
 		build packit.BuildFunc
 	)
@@ -34,7 +37,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		workingDir, err = ioutil.TempDir("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		build = pythonstart.Build()
+		buffer = bytes.NewBuffer(nil)
+		logger := scribe.NewLogger(buffer)
+
+		build = pythonstart.Build(logger)
 	})
 
 	it.After(func() {
@@ -43,7 +49,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
-	it("returns a result that builds correctly", func() {
+	it("returns a result that sets the python launch command", func() {
 		result, err := build(packit.BuildContext{
 			WorkingDir: workingDir,
 			CNBPath:    cnbDir,
@@ -64,7 +70,18 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Entries: nil,
 			},
 			Layers: nil,
+			Launch: packit.LaunchMetadata{
+				Processes: []packit.Process{
+					{
+						Type:    "web",
+						Command: "python",
+					},
+				},
+			},
 		}))
 
+		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
+		Expect(buffer.String()).To(ContainSubstring("Assigning launch process"))
+		Expect(buffer.String()).To(ContainSubstring("web: python"))
 	})
 }
