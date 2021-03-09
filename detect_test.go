@@ -32,13 +32,23 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
-	context("when conditions for detect true are met", func() {
+	context("detection phase", func() {
 		it("detects", func() {
 			result, err := detect(packit.DetectContext{
 				WorkingDir: workingDir,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Plan).To(Equal(packit.BuildPlan{}))
+			Expect(result.Plan).To(Equal(packit.BuildPlan{
+				Provides: []packit.BuildPlanProvision{},
+				Requires: []packit.BuildPlanRequirement{
+					{
+						Name: "cpython",
+						Metadata: pythonstart.BuildPlanMetadata{
+							Launch: true,
+						},
+					},
+				},
+			}))
 		})
 	})
 }
