@@ -1,3 +1,5 @@
 {
-  "cpython": "github.com/paketo-community/cpython"
+  "cpython": "github.com/paketo-community/cpython",
+  "pip": "github.com/paketo-community/pip",
+  "pip-install": "github.com/paketo-community/pip-install"
 }

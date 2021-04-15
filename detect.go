@@ -29,6 +29,25 @@ func Detect() packit.DetectFunc {
 						},
 					},
 				},
+				Or: []packit.BuildPlan{
+					{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: "cpython",
+								Metadata: BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+							{
+								Name: "site-packages",
+								Metadata: BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+						},
+					},
+				},
 			},
 		}, nil
 	}

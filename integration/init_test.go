@@ -15,8 +15,10 @@ import (
 )
 
 var (
-	buildpack        string
-	cpythonBuildpack string
+	buildpack           string
+	cpythonBuildpack    string
+	pipBuildpack        string
+	pipInstallBuildpack string
 
 	buildpackInfo struct {
 		Buildpack struct {
@@ -26,7 +28,9 @@ var (
 	}
 
 	config struct {
-		Cpython string `json:"cpython"`
+		Cpython    string `json:"cpython"`
+		Pip        string `json:"pip"`
+		PipInstall string `json:"pip-install"`
 	}
 )
 
@@ -58,6 +62,14 @@ func TestIntegration(t *testing.T) {
 
 	cpythonBuildpack, err = buildpackStore.Get.
 		Execute(config.Cpython)
+	Expect(err).NotTo(HaveOccurred())
+
+	pipBuildpack, err = buildpackStore.Get.
+		Execute(config.Pip)
+	Expect(err).NotTo(HaveOccurred())
+
+	pipInstallBuildpack, err = buildpackStore.Get.
+		Execute(config.PipInstall)
 	Expect(err).NotTo(HaveOccurred())
 
 	SetDefaultEventuallyTimeout(5 * time.Second)
