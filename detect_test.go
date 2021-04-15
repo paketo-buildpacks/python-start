@@ -48,6 +48,25 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						},
 					},
 				},
+				Or: []packit.BuildPlan{
+					{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: "cpython",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+							{
+								Name: "site-packages",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+						},
+					},
+				},
 			}))
 		})
 	})

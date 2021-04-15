@@ -5,6 +5,15 @@ The Paketo Python Start CNB sets the start command for a given python applicatio
 It sets `python` as the default start command, which will start the Python REPL
 (read-eval-print loop) at launch.
 
+## Behavior
+This buildpack always participates.
+
+The buildpack will do the following:
+* At build time:
+  - Assigns launch process to `python`
+* At run time:
+  - Does nothing
+
 ## Integration
 
 This CNB writes a start command, so there's currently no scenario we can
