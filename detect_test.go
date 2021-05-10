@@ -66,6 +66,17 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							},
 						},
 					},
+					{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: "conda-environment",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+						},
+					},
 				},
 			}))
 		})

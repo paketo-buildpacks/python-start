@@ -47,6 +47,17 @@ func Detect() packit.DetectFunc {
 							},
 						},
 					},
+					{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: "conda-environment",
+								Metadata: BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+						},
+					},
 				},
 			},
 		}, nil

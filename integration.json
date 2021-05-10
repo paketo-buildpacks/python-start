@@ -1,5 +1,7 @@
 {
   "cpython": "github.com/paketo-community/cpython",
   "pip": "github.com/paketo-community/pip",
-  "pip-install": "github.com/paketo-community/pip-install"
+  "pip-install": "github.com/paketo-community/pip-install",
+  "miniconda": "github.com/paketo-community/miniconda",
+  "conda-env-update": "github.com/paketo-community/conda-env-update"
 }
