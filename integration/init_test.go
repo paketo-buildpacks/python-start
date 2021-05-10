@@ -15,10 +15,12 @@ import (
 )
 
 var (
-	buildpack           string
-	cpythonBuildpack    string
-	pipBuildpack        string
-	pipInstallBuildpack string
+	buildpack               string
+	cpythonBuildpack        string
+	pipBuildpack            string
+	pipInstallBuildpack     string
+	minicondaBuildpack      string
+	condaEnvUpdateBuildpack string
 
 	buildpackInfo struct {
 		Buildpack struct {
@@ -28,9 +30,11 @@ var (
 	}
 
 	config struct {
-		Cpython    string `json:"cpython"`
-		Pip        string `json:"pip"`
-		PipInstall string `json:"pip-install"`
+		Cpython        string `json:"cpython"`
+		Pip            string `json:"pip"`
+		PipInstall     string `json:"pip-install"`
+		Miniconda      string `json:"miniconda"`
+		CondaEnvUpdate string `json:"conda-env-update"`
 	}
 )
 
@@ -70,6 +74,14 @@ func TestIntegration(t *testing.T) {
 
 	pipInstallBuildpack, err = buildpackStore.Get.
 		Execute(config.PipInstall)
+	Expect(err).NotTo(HaveOccurred())
+
+	minicondaBuildpack, err = buildpackStore.Get.
+		Execute(config.Miniconda)
+	Expect(err).NotTo(HaveOccurred())
+
+	condaEnvUpdateBuildpack, err = buildpackStore.Get.
+		Execute(config.CondaEnvUpdate)
 	Expect(err).NotTo(HaveOccurred())
 
 	SetDefaultEventuallyTimeout(5 * time.Second)
