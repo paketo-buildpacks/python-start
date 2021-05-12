@@ -3,6 +3,7 @@ package pythonstart_test
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/paketo-buildpacks/packit"
@@ -23,6 +24,9 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	it.Before(func() {
 		var err error
 		workingDir, err = ioutil.TempDir("", "working-dir")
+		Expect(err).NotTo(HaveOccurred())
+
+		err = os.WriteFile(filepath.Join(workingDir, "x.py"), []byte{}, os.ModePerm)
 		Expect(err).NotTo(HaveOccurred())
 
 		detect = pythonstart.Detect()
@@ -79,6 +83,19 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					},
 				},
 			}))
+		})
+
+		context("When no python related files are present", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
+			})
+
+			it("fails detection", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).To(MatchError(ContainSubstring("No *.py, environment.yml or package-list.txt found")))
+			})
 		})
 	})
 }
