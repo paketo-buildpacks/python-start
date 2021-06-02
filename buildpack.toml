@@ -1,12 +1,12 @@
 api = "0.5"
 
 [buildpack]
-  id = "paketo-community/python-start"
   homepage = "https://github.com/paketo-community/python-start"
+  id = "paketo-community/python-start"
   name = "Paketo Python Start Buildpack"
 
 [metadata]
-  include-files = ["bin/run","bin/build","bin/detect","buildpack.toml"]
+  include-files = ["bin/run", "bin/build", "bin/detect", "buildpack.toml"]
   pre-package = "./scripts/build.sh"
 
 [[stacks]]
