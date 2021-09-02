@@ -1,4 +1,4 @@
-module github.com/paketo-community/python-start
+module github.com/paketo-buildpacks/python-start
 
 go 1.14
 

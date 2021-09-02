@@ -1,7 +1,7 @@
 {
-  "cpython": "github.com/paketo-community/cpython",
-  "pip": "github.com/paketo-community/pip",
-  "pip-install": "github.com/paketo-community/pip-install",
-  "miniconda": "github.com/paketo-community/miniconda",
-  "conda-env-update": "github.com/paketo-community/conda-env-update"
+  "cpython": "github.com/paketo-buildpacks/cpython",
+  "pip": "github.com/paketo-buildpacks/pip",
+  "pip-install": "github.com/paketo-buildpacks/pip-install",
+  "miniconda": "github.com/paketo-buildpacks/miniconda",
+  "conda-env-update": "github.com/paketo-buildpacks/conda-env-update"
 }
