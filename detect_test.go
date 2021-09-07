@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/packit"
-	pythonstart "github.com/paketo-community/python-start"
+	pythonstart "github.com/paketo-buildpacks/python-start"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"

@@ -5,7 +5,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/scribe"
-	pythonstart "github.com/paketo-community/python-start"
+	pythonstart "github.com/paketo-buildpacks/python-start"
 )
 
 func main() {
