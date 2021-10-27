@@ -2,8 +2,10 @@ package pythonstart
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/paketo-buildpacks/packit"
 )
@@ -20,8 +22,14 @@ type BuildPlanMetadata struct {
 // Detect will return a packit.DetectFunc that will be invoked during the
 // detect phase of the buildpack lifecycle.
 //
-// This buildpack will always pass detection.
-// It will require "cpython" as launch-time build plan requirements.
+// If this buildpack detects files that indicate your app is a Python project,
+// it will pass detection. It will require "cpython" OR "cpython" and
+// "site-packages" OR "conda-environment" as launch-time build plan
+// requirements, depending on whether it detects files indicating the use of
+// different package managers.
+//
+// If BP_LIVE_RELOAD_ENABLED=true in the build environment, it will
+// additionally require "watchexec" at launch-time
 func Detect() packit.DetectFunc {
 	return func(context packit.DetectContext) (packit.DetectResult, error) {
 		envFile, err := fileExists(filepath.Join(context.WorkingDir, "environment.yml"))
@@ -43,48 +51,67 @@ func Detect() packit.DetectFunc {
 			return packit.DetectResult{}, packit.Fail.WithMessage("No *.py, environment.yml or package-list.txt found")
 		}
 
-		return packit.DetectResult{
-			Plan: packit.BuildPlan{
-				Provides: []packit.BuildPlanProvision{},
-				Requires: []packit.BuildPlanRequirement{
-					{
-						Name: "cpython",
-						Metadata: BuildPlanMetadata{
-							Launch: true,
-						},
-					},
-				},
-				Or: []packit.BuildPlan{
-					{
-						Provides: []packit.BuildPlanProvision{},
-						Requires: []packit.BuildPlanRequirement{
-							{
-								Name: "cpython",
-								Metadata: BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-							{
-								Name: "site-packages",
-								Metadata: BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-						},
-					},
-					{
-						Provides: []packit.BuildPlanProvision{},
-						Requires: []packit.BuildPlanRequirement{
-							{
-								Name: "conda-environment",
-								Metadata: BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-						},
+		simplePlan := packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{},
+			Requires: []packit.BuildPlanRequirement{
+				{
+					Name: "cpython",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
 					},
 				},
 			},
+		}
+
+		pipPlan := packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{},
+			Requires: []packit.BuildPlanRequirement{
+				{
+					Name: "cpython",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+				{
+					Name: "site-packages",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+			},
+		}
+
+		condaPlan := packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{},
+			Requires: []packit.BuildPlanRequirement{
+				{
+					Name: "conda-environment",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+			},
+		}
+
+		plans := []packit.BuildPlan{simplePlan, pipPlan, condaPlan}
+
+		shouldReload, err := checkLiveReloadEnabled()
+		if err != nil {
+			return packit.DetectResult{}, err
+		}
+
+		if shouldReload {
+			for i := range plans {
+				plans[i].Requires = append(plans[i].Requires, packit.BuildPlanRequirement{
+					Name: "watchexec",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				})
+			}
+		}
+		return packit.DetectResult{
+			Plan: or(plans...),
 		}, nil
 	}
 }
@@ -98,4 +125,30 @@ func fileExists(path string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func checkLiveReloadEnabled() (bool, error) {
+	if reload, ok := os.LookupEnv("BP_LIVE_RELOAD_ENABLED"); ok {
+		shouldEnableReload, err := strconv.ParseBool(reload)
+		if err != nil {
+			return false, fmt.Errorf("failed to parse BP_LIVE_RELOAD_ENABLED value %s: %w", reload, err)
+		}
+		return shouldEnableReload, nil
+	}
+	return false, nil
+}
+
+func or(plans ...packit.BuildPlan) packit.BuildPlan {
+	if len(plans) < 1 {
+		return packit.BuildPlan{}
+	}
+	combinedPlan := plans[0]
+
+	for i := range plans {
+		if i == 0 {
+			continue
+		}
+		combinedPlan.Or = append(combinedPlan.Or, plans[i])
+	}
+	return combinedPlan
 }

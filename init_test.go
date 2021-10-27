@@ -8,7 +8,7 @@ import (
 )
 
 func TestUnitPythonStart(t *testing.T) {
-	suite := spec.New("python-start", spec.Report(report.Terminal{}), spec.Parallel())
+	suite := spec.New("python-start", spec.Report(report.Terminal{}), spec.Sequential())
 	suite("Build", testBuild)
 	suite("Detect", testDetect)
 	suite.Run(t)

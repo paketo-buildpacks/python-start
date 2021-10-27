@@ -6,13 +6,23 @@ It sets `python` as the default start command, which will start the Python REPL
 (read-eval-print loop) at launch.
 
 ## Behavior
-This buildpack always participates.
+This buildpack participates if it identifies certain python-related files (e.g.
+`*.py` files) in the app source code directory.
 
 The buildpack will do the following:
 * At build time:
   - Assigns launch process to `python`
 * At run time:
   - Does nothing
+
+## Enabling reloadable process types
+
+You can configure this buildpack to wrap the entrypoint process of your app
+such that it kills and restarts the process whenever files in the app's working
+directory in the container change. With this feature enabled, copying new
+verisons of source code into the running container will trigger your app's
+process to restart. Set the environment variable `BP_LIVE_RELOAD_ENABLED=true`
+at build time to enable this feature.
 
 ## Integration
 

@@ -21,6 +21,7 @@ var (
 	pipInstallBuildpack     string
 	minicondaBuildpack      string
 	condaEnvUpdateBuildpack string
+	watchexecBuildpack      string
 
 	buildpackInfo struct {
 		Buildpack struct {
@@ -35,6 +36,7 @@ var (
 		PipInstall     string `json:"pip-install"`
 		Miniconda      string `json:"miniconda"`
 		CondaEnvUpdate string `json:"conda-env-update"`
+		Watchexec      string `json:"watchexec"`
 	}
 )
 
@@ -82,6 +84,10 @@ func TestIntegration(t *testing.T) {
 
 	condaEnvUpdateBuildpack, err = buildpackStore.Get.
 		Execute(config.CondaEnvUpdate)
+	Expect(err).NotTo(HaveOccurred())
+
+	watchexecBuildpack, err = buildpackStore.Get.
+		Execute(config.Watchexec)
 	Expect(err).NotTo(HaveOccurred())
 
 	SetDefaultEventuallyTimeout(5 * time.Second)
