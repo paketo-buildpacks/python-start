@@ -57,7 +57,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Provides: []packit.BuildPlanProvision{},
 						Requires: []packit.BuildPlanRequirement{
 							{
-								Name: "cpython",
+								Name: "cpython", // TODO: Ask about BuildPlanMetadata
 								Metadata: pythonstart.BuildPlanMetadata{
 									Launch: true,
 								},
@@ -85,6 +85,81 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			}))
 		})
 
+		context("when BP_LIVE_RELOAD_ENABLED=true in the build environment", func() {
+			it.Before(func() {
+				os.Setenv("BP_LIVE_RELOAD_ENABLED", "true")
+			})
+
+			it.After(func() {
+				os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
+			})
+
+			it("requires watchexec at launch", func() {
+				result, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Plan).To(Equal(packit.BuildPlan{
+					Provides: []packit.BuildPlanProvision{},
+					Requires: []packit.BuildPlanRequirement{
+						{
+							Name: "cpython",
+							Metadata: pythonstart.BuildPlanMetadata{
+								Launch: true,
+							},
+						},
+						{
+							Name: "watchexec",
+							Metadata: pythonstart.BuildPlanMetadata{
+								Launch: true,
+							},
+						},
+					},
+					Or: []packit.BuildPlan{
+						{
+							Provides: []packit.BuildPlanProvision{},
+							Requires: []packit.BuildPlanRequirement{
+								{
+									Name: "cpython",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+								{
+									Name: "site-packages",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+								{
+									Name: "watchexec",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+							},
+						},
+						{
+							Provides: []packit.BuildPlanProvision{},
+							Requires: []packit.BuildPlanRequirement{
+								{
+									Name: "conda-environment",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+								{
+									Name: "watchexec",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+							},
+						},
+					},
+				}))
+			})
+		})
 		context("When no python related files are present", func() {
 			it.Before(func() {
 				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
@@ -97,5 +172,24 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Expect(err).To(MatchError(ContainSubstring("No *.py, environment.yml or package-list.txt found")))
 			})
 		})
+	})
+	context("failure cases", func() {
+		context("when BP_LIVE_RELOAD_ENABLED is set to an invalid value", func() {
+			it.Before(func() {
+				os.Setenv("BP_LIVE_RELOAD_ENABLED", "not-a-bool")
+			})
+
+			it.After(func() {
+				os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
+			})
+
+			it("returns an error", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).To(MatchError(ContainSubstring("failed to parse BP_LIVE_RELOAD_ENABLED value not-a-bool")))
+			})
+		})
+
 	})
 }
