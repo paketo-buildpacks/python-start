@@ -3,6 +3,5 @@
   "pip": "github.com/paketo-buildpacks/pip",
   "pip-install": "github.com/paketo-buildpacks/pip-install",
   "miniconda": "github.com/paketo-buildpacks/miniconda",
-  "watchexec": "github.com/paketo-buildpacks/watchexec",
   "conda-env-update": "github.com/paketo-buildpacks/conda-env-update"
 }

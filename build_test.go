@@ -2,7 +2,6 @@ package pythonstart_test
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -86,75 +85,4 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(buffer.String()).To(ContainSubstring("web: python"))
 	})
 
-	context("BP_LIVE_RELOAD_ENABLED=true in the build environment", func() {
-		it.Before(func() {
-			os.Setenv("BP_LIVE_RELOAD_ENABLED", "true")
-		})
-
-		it.After(func() {
-			os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
-		})
-
-		it("returns a result that uses watchexec to set the start command", func() {
-			result, err := build(packit.BuildContext{
-				WorkingDir: workingDir,
-				CNBPath:    cnbDir,
-				Stack:      "some-stack",
-				BuildpackInfo: packit.BuildpackInfo{
-					Name:    "Some Buildpack",
-					Version: "some-version",
-				},
-				Plan: packit.BuildpackPlan{
-					Entries: []packit.BuildpackPlanEntry{},
-				},
-				Layers: packit.Layers{Path: layersDir},
-			})
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(result.Launch.Processes).To(Equal([]packit.Process{
-				{
-					Type:    "web",
-					Command: fmt.Sprintf(`watchexec --restart --watch %s "python"`, workingDir),
-				},
-				{
-					Type:    "no-reload",
-					Command: "python",
-				},
-			}))
-
-			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
-			Expect(buffer.String()).To(ContainSubstring("Assigning launch process"))
-			Expect(buffer.String()).To(ContainSubstring(fmt.Sprintf(`web: watchexec --restart --watch %s "python"`, workingDir)))
-			Expect(buffer.String()).To(ContainSubstring("no-reload: python"))
-		})
-	})
-
-	context("failure cases", func() {
-		context("when BP_LIVE_RELOAD_ENABLED is set to an invalid value", func() {
-			it.Before(func() {
-				os.Setenv("BP_LIVE_RELOAD_ENABLED", "not-a-bool")
-			})
-
-			it.After(func() {
-				os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
-			})
-
-			it("returns an error", func() {
-				_, err := build(packit.BuildContext{
-					WorkingDir: workingDir,
-					CNBPath:    cnbDir,
-					Stack:      "some-stack",
-					BuildpackInfo: packit.BuildpackInfo{
-						Name:    "Some Buildpack",
-						Version: "some-version",
-					},
-					Plan: packit.BuildpackPlan{
-						Entries: []packit.BuildpackPlanEntry{},
-					},
-					Layers: packit.Layers{Path: layersDir},
-				})
-				Expect(err).To(MatchError(ContainSubstring("failed to parse BP_LIVE_RELOAD_ENABLED value not-a-bool")))
-			})
-		})
-	})
 }
