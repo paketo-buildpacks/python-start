@@ -23,6 +23,7 @@ func Build(logger scribe.Logger) packit.BuildFunc {
 					{
 						Type:    "web",
 						Command: command,
+						Default: true,
 					},
 				},
 			},
