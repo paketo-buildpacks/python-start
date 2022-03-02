@@ -93,7 +93,25 @@ func Detect() packit.DetectFunc {
 			},
 		}
 
-		plans := []packit.BuildPlan{simplePlan, pipPlan, condaPlan}
+		poetryInstallPlan := packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{},
+			Requires: []packit.BuildPlanRequirement{
+				{
+					Name: "cpython",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+				{
+					Name: "poetry-venv",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+			},
+		}
+
+		plans := []packit.BuildPlan{simplePlan, pipPlan, condaPlan, poetryInstallPlan}
 
 		shouldReload, err := checkLiveReloadEnabled()
 		if err != nil {
