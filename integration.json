@@ -3,5 +3,7 @@
   "pip": "github.com/paketo-buildpacks/pip",
   "pip-install": "github.com/paketo-buildpacks/pip-install",
   "miniconda": "github.com/paketo-buildpacks/miniconda",
-  "conda-env-update": "github.com/paketo-buildpacks/conda-env-update"
+  "conda-env-update": "github.com/paketo-buildpacks/conda-env-update",
+  "poetry":"github.com/paketo-buildpacks/poetry",
+  "poetry-install": "github.com/paketo-buildpacks/poetry-install"
 }

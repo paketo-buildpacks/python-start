@@ -21,6 +21,8 @@ var (
 	pipInstallBuildpack     string
 	minicondaBuildpack      string
 	condaEnvUpdateBuildpack string
+	poetryBuildpack         string
+	poetryInstallBuildpack  string
 
 	buildpackInfo struct {
 		Buildpack struct {
@@ -35,6 +37,8 @@ var (
 		PipInstall     string `json:"pip-install"`
 		Miniconda      string `json:"miniconda"`
 		CondaEnvUpdate string `json:"conda-env-update"`
+		Poetry         string `json:"poetry"`
+		PoetryInstall  string `json:"poetry-install"`
 	}
 )
 
@@ -82,6 +86,14 @@ func TestIntegration(t *testing.T) {
 
 	condaEnvUpdateBuildpack, err = buildpackStore.Get.
 		Execute(config.CondaEnvUpdate)
+	Expect(err).NotTo(HaveOccurred())
+
+	poetryBuildpack, err = buildpackStore.Get.
+		Execute(config.Poetry)
+	Expect(err).NotTo(HaveOccurred())
+
+	poetryInstallBuildpack, err = buildpackStore.Get.
+		Execute(config.PoetryInstall)
 	Expect(err).NotTo(HaveOccurred())
 
 	SetDefaultEventuallyTimeout(5 * time.Second)
