@@ -164,7 +164,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			)
 		})
 
-		it("builds an oci image with poetry (dependency management only, not runnable)", func() {
+		it("builds an oci image with poetry (dependency management only)", func() {
 			var err error
 			source, err = occam.Source(filepath.Join("testdata", "poetry"))
 			Expect(err).NotTo(HaveOccurred())
