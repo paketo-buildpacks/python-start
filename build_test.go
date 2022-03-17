@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/scribe"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 	pythonstart "github.com/paketo-buildpacks/python-start"
 	"github.com/sclevine/spec"
 

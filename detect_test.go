@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/v2"
 	pythonstart "github.com/paketo-buildpacks/python-start"
 	"github.com/sclevine/spec"
 
