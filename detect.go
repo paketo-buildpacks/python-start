@@ -1,13 +1,13 @@
 package pythonstart
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 
 	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/fs"
 )
 
 // BuildPlanMetadata is the buildpack specific data included in build plan
@@ -32,12 +32,12 @@ type BuildPlanMetadata struct {
 // additionally require "watchexec" at launch-time
 func Detect() packit.DetectFunc {
 	return func(context packit.DetectContext) (packit.DetectResult, error) {
-		envFile, err := fileExists(filepath.Join(context.WorkingDir, "environment.yml"))
+		envFile, err := fs.Exists(filepath.Join(context.WorkingDir, "environment.yml"))
 		if err != nil {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat environment.yml: %w", err)
 		}
 
-		lockFile, err := fileExists(filepath.Join(context.WorkingDir, "package-list.txt"))
+		lockFile, err := fs.Exists(filepath.Join(context.WorkingDir, "package-list.txt"))
 		if err != nil {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat package-list.txt: %w", err)
 		}
@@ -132,17 +132,6 @@ func Detect() packit.DetectFunc {
 			Plan: or(plans...),
 		}, nil
 	}
-}
-
-func fileExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
 }
 
 func checkLiveReloadEnabled() (bool, error) {
