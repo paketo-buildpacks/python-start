@@ -42,13 +42,18 @@ func Detect() packit.DetectFunc {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat package-list.txt: %w", err)
 		}
 
+		pyprojectTOMLFile, err := fs.Exists(filepath.Join(context.WorkingDir, "pyproject.toml"))
+		if err != nil {
+			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat pyproject.toml: %w", err)
+		}
+
 		pythonFiles, err := filepath.Glob(filepath.Join(context.WorkingDir, "*.py"))
 		if err != nil {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to find *.py files: %w", err)
 		}
 
-		if !envFile && !lockFile && len(pythonFiles) < 1 {
-			return packit.DetectResult{}, packit.Fail.WithMessage("No *.py, environment.yml or package-list.txt found")
+		if !envFile && !lockFile && !pyprojectTOMLFile && len(pythonFiles) < 1 {
+			return packit.DetectResult{}, packit.Fail.WithMessage("No *.py, environment.yml, pyproject.toml, or package-list.txt found")
 		}
 
 		simplePlan := packit.BuildPlan{

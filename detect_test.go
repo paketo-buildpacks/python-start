@@ -25,8 +25,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		workingDir, err = os.MkdirTemp("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		err = os.WriteFile(filepath.Join(workingDir, "x.py"), []byte{}, os.ModePerm)
-		Expect(err).NotTo(HaveOccurred())
+		Expect(os.WriteFile(filepath.Join(workingDir, "x.py"), []byte{}, os.ModePerm)).To(Succeed())
 
 		detect = pythonstart.Detect()
 	})
@@ -56,7 +55,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Provides: []packit.BuildPlanProvision{},
 						Requires: []packit.BuildPlanRequirement{
 							{
-								Name: "cpython", // TODO: Ask about BuildPlanMetadata
+								Name: "cpython",
 								Metadata: pythonstart.BuildPlanMetadata{
 									Launch: true,
 								},
@@ -199,6 +198,49 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				}))
 			})
 		})
+
+		context("When only an environment.yml file is present", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(workingDir, "environment.yml"), []byte{}, os.ModePerm)).To(Succeed())
+			})
+
+			it("passes detection", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		context("When only a package-list.txt file is present", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(workingDir, "package-list.txt"), []byte{}, os.ModePerm)).To(Succeed())
+			})
+
+			it("passes detection", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		context("When only a pyproject.toml file is present", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte{}, os.ModePerm)).To(Succeed())
+			})
+
+			it("passes detection", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
 		context("When no python related files are present", func() {
 			it.Before(func() {
 				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
@@ -208,10 +250,11 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				_, err := detect(packit.DetectContext{
 					WorkingDir: workingDir,
 				})
-				Expect(err).To(MatchError(ContainSubstring("No *.py, environment.yml or package-list.txt found")))
+				Expect(err).To(MatchError(ContainSubstring("No *.py, environment.yml, pyproject.toml, or package-list.txt found")))
 			})
 		})
 	})
+
 	context("failure cases", func() {
 		context("when BP_LIVE_RELOAD_ENABLED is set to an invalid value", func() {
 			it.Before(func() {
