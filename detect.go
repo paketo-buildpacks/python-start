@@ -108,6 +108,12 @@ func Detect() packit.DetectFunc {
 					},
 				},
 				{
+					Name: "poetry",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+				{
 					Name: "poetry-venv",
 					Metadata: BuildPlanMetadata{
 						Launch: true,
