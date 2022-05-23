@@ -89,6 +89,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								},
 							},
 							{
+								Name: "poetry",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+							{
 								Name: "poetry-venv",
 								Metadata: pythonstart.BuildPlanMetadata{
 									Launch: true,
@@ -176,6 +182,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Requires: []packit.BuildPlanRequirement{
 								{
 									Name: "cpython",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+								{
+									Name: "poetry",
 									Metadata: pythonstart.BuildPlanMetadata{
 										Launch: true,
 									},
