@@ -37,7 +37,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(err).NotTo(HaveOccurred())
 
 		buffer = bytes.NewBuffer(nil)
-		logger := scribe.NewLogger(buffer)
+		logger := scribe.NewEmitter(buffer)
 
 		build = pythonstart.Build(logger)
 	})
@@ -75,14 +75,15 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						Type:    "web",
 						Command: "python",
 						Default: true,
+						Direct:  true,
 					},
 				},
 			},
 		}))
 
 		Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
-		Expect(buffer.String()).To(ContainSubstring("Assigning launch process"))
-		Expect(buffer.String()).To(ContainSubstring("web: python"))
+		Expect(buffer.String()).To(ContainSubstring("Assigning launch processes:"))
+		Expect(buffer.String()).To(ContainSubstring("web (default): python"))
 	})
 
 }
