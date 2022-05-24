@@ -11,6 +11,6 @@ import (
 func main() {
 	packit.Run(
 		pythonstart.Detect(),
-		pythonstart.Build(scribe.NewLogger(os.Stdout)),
+		pythonstart.Build(scribe.NewEmitter(os.Stdout)),
 	)
 }

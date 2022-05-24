@@ -64,8 +64,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
-				"  Assigning launch process",
-				"    web: python",
+				"  Assigning launch processes:",
+				"    web (default): python",
 			))
 
 			container, err = docker.Container.Run.
@@ -104,8 +104,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
-				"  Assigning launch process",
-				"    web: python",
+				"  Assigning launch processes:",
+				"    web (default): python",
 			))
 
 			container, err = docker.Container.Run.
@@ -143,8 +143,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
-				"  Assigning launch process",
-				"    web: python",
+				"  Assigning launch processes:",
+				"    web (default): python",
 			))
 
 			container, err = docker.Container.Run.
@@ -191,8 +191,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 				Expect(logs).To(ContainLines(
 					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
-					"  Assigning launch process",
-					"    web: python",
+					"  Assigning launch processes:",
+					"    web (default): python",
 				))
 
 				container, err = docker.Container.Run.

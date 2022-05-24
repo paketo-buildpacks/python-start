@@ -9,23 +9,24 @@ import (
 // phase of the buildpack lifecycle.
 //
 // Build assigns the image a launch process to run the Python REPL.
-func Build(logger scribe.Logger) packit.BuildFunc {
+func Build(logger scribe.Emitter) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 
-		logger.Process("Assigning launch process")
-		command := "python"
-		logger.Subprocess("web: %s", command)
+		processes := []packit.Process{
+			{
+				Type:    "web",
+				Command: "python",
+				Default: true,
+				Direct:  true,
+			},
+		}
+
+		logger.LaunchProcesses(processes)
 
 		return packit.BuildResult{
 			Launch: packit.LaunchMetadata{
-				Processes: []packit.Process{
-					{
-						Type:    "web",
-						Command: command,
-						Default: true,
-					},
-				},
+				Processes: processes,
 			},
 		}, nil
 	}
