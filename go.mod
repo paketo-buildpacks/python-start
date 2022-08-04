@@ -1,6 +1,6 @@
 module github.com/paketo-buildpacks/python-start
 
-go 1.15
+go 1.16
 
 require (
 	github.com/BurntSushi/toml v1.2.0
