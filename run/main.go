@@ -11,6 +11,6 @@ import (
 func main() {
 	packit.Run(
 		pythonstart.Detect(),
-		pythonstart.Build(scribe.NewEmitter(os.Stdout)),
+		pythonstart.Build(scribe.NewEmitter(os.Stdout).WithLevel(os.Getenv("BP_LOG_LEVEL"))),
 	)
 }
