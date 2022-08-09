@@ -6,7 +6,7 @@ require (
 	github.com/BurntSushi/toml v1.2.0
 	github.com/onsi/gomega v1.20.0
 	github.com/paketo-buildpacks/occam v0.12.0
-	github.com/paketo-buildpacks/packit/v2 v2.3.1
+	github.com/paketo-buildpacks/packit/v2 v2.4.0
 	github.com/sclevine/spec v1.4.0
 )
 
@@ -43,7 +43,6 @@ require (
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
-	github.com/stretchr/testify v1.8.0 // indirect
 	github.com/testcontainers/testcontainers-go v0.13.0 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.opencensus.io v0.23.0 // indirect
