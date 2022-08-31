@@ -3,7 +3,7 @@ api = "0.8"
 [buildpack]
   homepage = "https://github.com/paketo-buildpacks/python-start"
   id = "paketo-buildpacks/python-start"
-  name = "Paketo Python Start Buildpack"
+  name = "Paketo Buildpack for Python Start"
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
