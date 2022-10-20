@@ -49,25 +49,14 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Launch: true,
 						},
 					},
-				},
-				Or: []packit.BuildPlan{
 					{
-						Provides: []packit.BuildPlanProvision{},
-						Requires: []packit.BuildPlanRequirement{
-							{
-								Name: "cpython",
-								Metadata: pythonstart.BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-							{
-								Name: "site-packages",
-								Metadata: pythonstart.BuildPlanMetadata{
-									Launch: true,
-								},
-							},
+						Name: "site-packages",
+						Metadata: pythonstart.BuildPlanMetadata{
+							Launch: true,
 						},
 					},
+				},
+				Or: []packit.BuildPlan{
 					{
 						Provides: []packit.BuildPlanProvision{},
 						Requires: []packit.BuildPlanRequirement{
@@ -102,6 +91,17 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							},
 						},
 					},
+					{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: "cpython",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+						},
+					},
 				},
 			}))
 		})
@@ -130,6 +130,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							},
 						},
 						{
+							Name: "site-packages",
+							Metadata: pythonstart.BuildPlanMetadata{
+								Launch: true,
+							},
+						},
+						{
 							Name: "watchexec",
 							Metadata: pythonstart.BuildPlanMetadata{
 								Launch: true,
@@ -137,29 +143,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						},
 					},
 					Or: []packit.BuildPlan{
-						{
-							Provides: []packit.BuildPlanProvision{},
-							Requires: []packit.BuildPlanRequirement{
-								{
-									Name: "cpython",
-									Metadata: pythonstart.BuildPlanMetadata{
-										Launch: true,
-									},
-								},
-								{
-									Name: "site-packages",
-									Metadata: pythonstart.BuildPlanMetadata{
-										Launch: true,
-									},
-								},
-								{
-									Name: "watchexec",
-									Metadata: pythonstart.BuildPlanMetadata{
-										Launch: true,
-									},
-								},
-							},
-						},
 						{
 							Provides: []packit.BuildPlanProvision{},
 							Requires: []packit.BuildPlanRequirement{
@@ -194,6 +177,23 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								},
 								{
 									Name: "poetry-venv",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+								{
+									Name: "watchexec",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+							},
+						},
+						{
+							Provides: []packit.BuildPlanProvision{},
+							Requires: []packit.BuildPlanRequirement{
+								{
+									Name: "cpython",
 									Metadata: pythonstart.BuildPlanMetadata{
 										Launch: true,
 									},
