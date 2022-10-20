@@ -122,7 +122,7 @@ func Detect() packit.DetectFunc {
 			},
 		}
 
-		plans := []packit.BuildPlan{simplePlan, pipPlan, condaPlan, poetryInstallPlan}
+		plans := []packit.BuildPlan{pipPlan, condaPlan, poetryInstallPlan, simplePlan}
 
 		shouldReload, err := checkLiveReloadEnabled()
 		if err != nil {
