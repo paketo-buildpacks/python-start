@@ -37,6 +37,11 @@ func Detect() packit.DetectFunc {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat environment.yml: %w", err)
 		}
 
+		requirementsFile, err := fs.Exists(filepath.Join(context.WorkingDir, "requirements.txt"))
+		if err != nil {
+			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat requirements.txt: %w", err)
+		}
+
 		lockFile, err := fs.Exists(filepath.Join(context.WorkingDir, "package-list.txt"))
 		if err != nil {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat package-list.txt: %w", err)
@@ -52,8 +57,8 @@ func Detect() packit.DetectFunc {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to find *.py files: %w", err)
 		}
 
-		if !envFile && !lockFile && !pyprojectTOMLFile && len(pythonFiles) < 1 {
-			return packit.DetectResult{}, packit.Fail.WithMessage("No *.py, environment.yml, pyproject.toml, or package-list.txt found")
+		if !envFile && !requirementsFile && !lockFile && !pyprojectTOMLFile && len(pythonFiles) < 1 {
+			return packit.DetectResult{}, packit.Fail.WithMessage("No *.py, environment.yml, requirements.txt, pyproject.toml, or package-list.txt found")
 		}
 
 		simplePlan := packit.BuildPlan{
