@@ -225,6 +225,20 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			})
 		})
 
+		context("When only a requirements.txt file is present", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(workingDir, "requirements.txt"), []byte{}, os.ModePerm)).To(Succeed())
+			})
+
+			it("passes detection", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
 		context("When only a package-list.txt file is present", func() {
 			it.Before(func() {
 				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
@@ -262,7 +276,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				_, err := detect(packit.DetectContext{
 					WorkingDir: workingDir,
 				})
-				Expect(err).To(MatchError(ContainSubstring("No *.py, environment.yml, pyproject.toml, or package-list.txt found")))
+				Expect(err).To(MatchError(ContainSubstring("No *.py, environment.yml, requirements.txt, pyproject.toml, or package-list.txt found")))
 			})
 		})
 	})
