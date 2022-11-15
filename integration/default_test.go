@@ -125,6 +125,46 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			)
 		})
 
+		it("builds an oci image with site-packages and module", func() {
+			var err error
+			source, err = occam.Source(filepath.Join("testdata", "module_app"))
+			Expect(err).NotTo(HaveOccurred())
+
+			var logs fmt.Stringer
+			image, logs, err = pack.WithNoColor().Build.
+				WithPullPolicy("never").
+				WithBuildpacks(
+					cpythonBuildpack,
+					pipBuildpack,
+					pipInstallBuildpack,
+					buildpack,
+				).
+				Execute(name, source)
+			Expect(err).NotTo(HaveOccurred(), logs.String())
+
+			Expect(logs).To(ContainLines(
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
+				"  Assigning launch processes:",
+				"    web (default): python",
+			))
+
+			container, err = docker.Container.Run.
+				WithTTY().
+				Execute(image.ID)
+			Expect(err).NotTo(HaveOccurred())
+
+			Eventually(func() string {
+				cLogs, err := docker.Container.Logs.Execute(container.ID)
+				Expect(err).NotTo(HaveOccurred())
+				return cLogs.String()
+			}).Should(
+				And(
+					MatchRegexp(`Python 3\.\d+\.\d+`),
+					ContainSubstring(`Type "help", "copyright", "credits" or "license" for more information.`),
+				),
+			)
+		})
+
 		it("builds an oci image with conda-environment", func() {
 			var err error
 			source, err = occam.Source(filepath.Join("testdata", "conda_app"))
