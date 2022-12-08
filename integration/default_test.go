@@ -125,6 +125,40 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			)
 		})
 
+		it("builds an oci image with site-packages and module", func() {
+			var err error
+			source, err = occam.Source(filepath.Join("testdata", "module_app"))
+			Expect(err).NotTo(HaveOccurred())
+
+			var logs fmt.Stringer
+			image, logs, err = pack.WithNoColor().Build.
+				WithPullPolicy("never").
+				WithBuildpacks(
+					cpythonBuildpack,
+					pipBuildpack,
+					pipInstallBuildpack,
+					buildpack,
+				).
+				Execute(name, source)
+			Expect(err).NotTo(HaveOccurred(), logs.String())
+
+			Expect(logs).To(ContainLines(
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
+				"  Assigning launch processes:",
+				"    web (default): python",
+			))
+
+			container, err = docker.Container.Run.
+				WithPublish("8000").
+				WithEntrypoint("launcher").
+				WithCommand("gunicorn -b 0.0.0.0 'module.wsgi:app'").
+				Execute(image.ID)
+			Expect(err).NotTo(HaveOccurred())
+
+			Eventually(container).
+				Should(Serve(ContainSubstring(`Hello, World!`)).OnPort(8000))
+		})
+
 		it("builds an oci image with conda-environment", func() {
 			var err error
 			source, err = occam.Source(filepath.Join("testdata", "conda_app"))
