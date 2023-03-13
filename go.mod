@@ -7,7 +7,7 @@ replace github.com/docker/docker => github.com/docker/docker v20.10.3-0.20221013
 
 require (
 	github.com/BurntSushi/toml v1.2.1
-	github.com/onsi/gomega v1.27.2
+	github.com/onsi/gomega v1.27.3
 	github.com/paketo-buildpacks/occam v0.15.1
 	github.com/paketo-buildpacks/packit/v2 v2.8.2
 	github.com/sclevine/spec v1.4.0
@@ -26,7 +26,7 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/klauspost/compress v1.15.15 // indirect
