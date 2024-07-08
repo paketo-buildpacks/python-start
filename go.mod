@@ -2,7 +2,7 @@ module github.com/paketo-buildpacks/python-start
 
 go 1.21
 
-toolchain go1.22.4
+toolchain go1.22.5
 
 // https://golang.testcontainers.org/quickstart/#2-install-testcontainers-for-go
 replace github.com/docker/docker => github.com/docker/docker v20.10.3-0.20221013203545-33ab36d6b304+incompatible // 22.06 branch
