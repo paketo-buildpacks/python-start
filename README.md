@@ -1,9 +1,10 @@
 # Python Start Cloud Native Buildpack
-## `gcr.io/paketo-buildpacks/python`
 
 The Paketo Python Start CNB sets the start command for a given python application.
 It sets `python` as the default start command, which will start the Python REPL
 (read-eval-print loop) at launch.
+
+The buildpack is published for consumption at `paketobuildpacks/python-start`.
 
 ## Behavior
 This buildpack participates if it identifies certain python-related files (e.g.
