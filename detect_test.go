@@ -108,11 +108,13 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		context("when BP_LIVE_RELOAD_ENABLED=true in the build environment", func() {
 			it.Before(func() {
-				os.Setenv("BP_LIVE_RELOAD_ENABLED", "true")
+				err := os.Setenv("BP_LIVE_RELOAD_ENABLED", "true")
+				Expect(err).NotTo(HaveOccurred())
 			})
 
 			it.After(func() {
-				os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
+				err := os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
+				Expect(err).NotTo(HaveOccurred())
 			})
 
 			it("requires watchexec at launch", func() {
@@ -284,11 +286,13 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	context("failure cases", func() {
 		context("when BP_LIVE_RELOAD_ENABLED is set to an invalid value", func() {
 			it.Before(func() {
-				os.Setenv("BP_LIVE_RELOAD_ENABLED", "not-a-bool")
+				err := os.Setenv("BP_LIVE_RELOAD_ENABLED", "not-a-bool")
+				Expect(err).NotTo(HaveOccurred())
 			})
 
 			it.After(func() {
-				os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
+				err := os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
+				Expect(err).NotTo(HaveOccurred())
 			})
 
 			it("returns an error", func() {
