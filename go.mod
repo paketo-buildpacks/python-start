@@ -6,7 +6,7 @@ go 1.25.5
 // replace github.com/docker/docker => github.com/docker/docker v20.10.3-0.20221013203545-33ab36d6b304+incompatible // 22.06 branch
 
 require (
-	github.com/BurntSushi/toml v1.5.0
+	github.com/BurntSushi/toml v1.6.0
 	github.com/onsi/gomega v1.38.3
 	github.com/paketo-buildpacks/occam v0.31.0
 	github.com/paketo-buildpacks/packit/v2 v2.25.3
