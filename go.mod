@@ -9,7 +9,7 @@ require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/onsi/gomega v1.39.0
 	github.com/paketo-buildpacks/occam v0.31.1
-	github.com/paketo-buildpacks/packit/v2 v2.25.3
+	github.com/paketo-buildpacks/packit/v2 v2.25.4
 	github.com/sclevine/spec v1.4.0
 )
 
@@ -41,7 +41,7 @@ require (
 	github.com/google/go-containerregistry v0.20.7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4 // indirect
-	github.com/klauspost/compress v1.18.2 // indirect
+	github.com/klauspost/compress v1.18.3 // indirect
 	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
