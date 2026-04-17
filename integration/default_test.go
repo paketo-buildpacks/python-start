@@ -95,8 +95,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					cpythonBuildpack,
-					pipBuildpack,
-					pipInstallBuildpack,
+					pythonPackageManagersInstallBuildpack,
+					pythonPackageManagersRunBuildpack,
 					buildpack,
 				).
 				Execute(name, source)
@@ -135,8 +135,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					cpythonBuildpack,
-					pipBuildpack,
-					pipInstallBuildpack,
+					pythonPackageManagersInstallBuildpack,
+					pythonPackageManagersRunBuildpack,
 					buildpack,
 				).
 				Execute(name, source)
@@ -168,8 +168,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			image, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					minicondaBuildpack,
-					condaEnvUpdateBuildpack,
+					pythonPackageManagersInstallBuildpack,
+					pythonPackageManagersRunBuildpack,
 					buildpack,
 				).
 				Execute(name, source)
@@ -215,9 +215,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 					WithPullPolicy("never").
 					WithBuildpacks(
 						cpythonBuildpack,
-						pipBuildpack,
-						poetryBuildpack,
-						poetryInstallBuildpack,
+						pythonPackageManagersInstallBuildpack,
+						pythonPackageManagersRunBuildpack,
 						buildpack,
 					).
 					Execute(name, source)

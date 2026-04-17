@@ -17,12 +17,6 @@ import (
 var (
 	buildpack                             string
 	cpythonBuildpack                      string
-	pipBuildpack                          string
-	pipInstallBuildpack                   string
-	minicondaBuildpack                    string
-	condaEnvUpdateBuildpack               string
-	poetryBuildpack                       string
-	poetryInstallBuildpack                string
 	pythonPackageManagersRunBuildpack     string
 	pythonPackageManagersInstallBuildpack string
 
@@ -35,12 +29,6 @@ var (
 
 	config struct {
 		Cpython                      string `json:"cpython"`
-		Pip                          string `json:"pip"`
-		PipInstall                   string `json:"pip-install"`
-		Miniconda                    string `json:"miniconda"`
-		CondaEnvUpdate               string `json:"conda-env-update"`
-		Poetry                       string `json:"poetry"`
-		PoetryInstall                string `json:"poetry-install"`
 		PythonPackageManagersInstall string `json:"python-package-managers-install"`
 		PythonPackageManagersRun     string `json:"python-package-managers-run"`
 	}
@@ -74,30 +62,6 @@ func TestIntegration(t *testing.T) {
 
 	cpythonBuildpack, err = buildpackStore.Get.
 		Execute(config.Cpython)
-	Expect(err).NotTo(HaveOccurred())
-
-	pipBuildpack, err = buildpackStore.Get.
-		Execute(config.Pip)
-	Expect(err).NotTo(HaveOccurred())
-
-	pipInstallBuildpack, err = buildpackStore.Get.
-		Execute(config.PipInstall)
-	Expect(err).NotTo(HaveOccurred())
-
-	minicondaBuildpack, err = buildpackStore.Get.
-		Execute(config.Miniconda)
-	Expect(err).NotTo(HaveOccurred())
-
-	condaEnvUpdateBuildpack, err = buildpackStore.Get.
-		Execute(config.CondaEnvUpdate)
-	Expect(err).NotTo(HaveOccurred())
-
-	poetryBuildpack, err = buildpackStore.Get.
-		Execute(config.Poetry)
-	Expect(err).NotTo(HaveOccurred())
-
-	poetryInstallBuildpack, err = buildpackStore.Get.
-		Execute(config.PoetryInstall)
 	Expect(err).NotTo(HaveOccurred())
 
 	pythonPackageManagersInstallBuildpack, err = buildpackStore.Get.
