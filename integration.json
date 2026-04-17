@@ -9,5 +9,7 @@
   "miniconda": "index.docker.io/paketobuildpacks/miniconda",
   "conda-env-update": "index.docker.io/paketobuildpacks/conda-env-update",
   "poetry":"index.docker.io/paketobuildpacks/poetry",
-  "poetry-install": "index.docker.io/paketobuildpacks/poetry-install"
+  "poetry-install": "index.docker.io/paketobuildpacks/poetry-install",
+  "python-package-managers-install": "index.docker.io/paketobuildpacks/python-package-managers-install",
+  "python-package-managers-run": "index.docker.io/paketobuildpacks/python-package-managers-run"
 }
