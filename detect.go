@@ -37,6 +37,11 @@ func Detect() packit.DetectFunc {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat environment.yml: %w", err)
 		}
 
+		pixiEnvFile, err := fs.Exists(filepath.Join(context.WorkingDir, "pixi.lock"))
+		if err != nil {
+			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat pixi.lock: %w", err)
+		}
+
 		requirementsFile, err := fs.Exists(filepath.Join(context.WorkingDir, "requirements.txt"))
 		if err != nil {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat requirements.txt: %w", err)
@@ -45,6 +50,11 @@ func Detect() packit.DetectFunc {
 		lockFile, err := fs.Exists(filepath.Join(context.WorkingDir, "package-list.txt"))
 		if err != nil {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat package-list.txt: %w", err)
+		}
+
+		uvLockFile, err := fs.Exists(filepath.Join(context.WorkingDir, "uv.lock"))
+		if err != nil {
+			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat uv.lock: %w", err)
 		}
 
 		pyprojectTOMLFile, err := fs.Exists(filepath.Join(context.WorkingDir, "pyproject.toml"))
@@ -57,8 +67,8 @@ func Detect() packit.DetectFunc {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to find *.py files: %w", err)
 		}
 
-		if !envFile && !requirementsFile && !lockFile && !pyprojectTOMLFile && len(pythonFiles) < 1 {
-			return packit.DetectResult{}, packit.Fail.WithMessage("No *.py, environment.yml, requirements.txt, pyproject.toml, or package-list.txt found")
+		if !envFile && !pixiEnvFile && !requirementsFile && !lockFile && !uvLockFile && !pyprojectTOMLFile && len(pythonFiles) < 1 {
+			return packit.DetectResult{}, packit.Fail.WithMessage("No *.py, environment.yml, pixi.lock, requirements.txt, uv.lock, pyproject.toml, or package-list.txt found")
 		}
 
 		simplePlan := packit.BuildPlan{
@@ -103,6 +113,30 @@ func Detect() packit.DetectFunc {
 			},
 		}
 
+		pixiPlan := packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{},
+			Requires: []packit.BuildPlanRequirement{
+				{
+					Name: "pixi-environment",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+			},
+		}
+
+		uvPlan := packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{},
+			Requires: []packit.BuildPlanRequirement{
+				{
+					Name: "uv-environment",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+			},
+		}
+
 		poetryInstallPlan := packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{},
 			Requires: []packit.BuildPlanRequirement{
@@ -127,7 +161,7 @@ func Detect() packit.DetectFunc {
 			},
 		}
 
-		plans := []packit.BuildPlan{pipPlan, condaPlan, poetryInstallPlan, simplePlan}
+		plans := []packit.BuildPlan{pipPlan, condaPlan, pixiPlan, uvPlan, poetryInstallPlan, simplePlan}
 
 		shouldReload, err := checkLiveReloadEnabled()
 		if err != nil {
