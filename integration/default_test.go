@@ -7,11 +7,39 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/occam"
+	"github.com/paketo-buildpacks/packit/v2/fs"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
 	. "github.com/paketo-buildpacks/occam/matchers"
 )
+
+func sourceWithCode(path string) (string, error) {
+	return sourceWithTarget(path, nil)
+}
+
+func sourceWithTarget(path string, targetFolder *string) (string, error) {
+	source, err := occam.Source(path)
+	if err != nil {
+		return "", err
+	}
+
+	codeFile := "server.py"
+	target := []string{source}
+	if targetFolder != nil {
+		target = append(target, *targetFolder)
+	}
+	target = append(target, codeFile)
+	finalPath := filepath.Join(target...)
+	codePath := filepath.Join("testdata", "sources", codeFile)
+
+	err = fs.Copy(codePath, finalPath)
+	if err != nil {
+		return "", err
+	}
+
+	return source, err
+}
 
 func testDefault(t *testing.T, context spec.G, it spec.S) {
 	var (
@@ -87,7 +115,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 		it("builds an oci image with site-packages", func() {
 			var err error
-			source, err = occam.Source(filepath.Join("testdata", "packages_app"))
+			source, err = sourceWithCode(filepath.Join("testdata", "packages_app"))
 			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
@@ -127,7 +155,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 		it("builds an oci image with site-packages and module", func() {
 			var err error
-			source, err = occam.Source(filepath.Join("testdata", "module_app"))
+			targetPath := "module"
+			source, err = sourceWithTarget(filepath.Join("testdata", "module_app"), &targetPath)
 			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
@@ -156,12 +185,12 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(container).
-				Should(Serve(ContainSubstring(`Hello, World!`)).OnPort(8000))
+				Should(Serve(MatchRegexp(`Hello, world! Using Python: 3\.\d+\.\d+ .*`)).OnPort(8000))
 		})
 
 		it("builds an oci image with conda-environment", func() {
 			var err error
-			source, err = occam.Source(filepath.Join("testdata", "conda_app"))
+			source, err = sourceWithCode(filepath.Join("testdata", "conda_app"))
 			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
@@ -207,7 +236,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 			it("builds an oci image with poetry on PATH", func() {
 				var err error
-				source, err = occam.Source(filepath.Join("testdata", "poetry"))
+				source, err = sourceWithCode(filepath.Join("testdata", "poetry"))
 				Expect(err).NotTo(HaveOccurred())
 
 				var logs fmt.Stringer
@@ -261,7 +290,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 		it("builds an oci image with pixi-environment", func() {
 			var err error
-			source, err = occam.Source(filepath.Join("testdata", "pixi_app"))
+			source, err = sourceWithCode(filepath.Join("testdata", "pixi_app"))
 			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer
@@ -300,7 +329,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 
 		it("builds an oci image with uv-environment", func() {
 			var err error
-			source, err = occam.Source(filepath.Join("testdata", "uv_app"))
+			source, err = sourceWithCode(filepath.Join("testdata", "uv_app"))
 			Expect(err).NotTo(HaveOccurred())
 
 			var logs fmt.Stringer

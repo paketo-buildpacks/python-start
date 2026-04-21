@@ -9,7 +9,7 @@ app = Flask(__name__)
 @app.route('/')
 def root():
     python_version = sys.version
-    return "Hello, world!\nUsing python: " + python_version + "\n"
+    return "Hello, world! Using Python: " + python_version
 
 
 if __name__ == '__main__':
