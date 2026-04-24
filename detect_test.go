@@ -35,111 +35,8 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("detection phase", func() {
-		it("detects", func() {
-			result, err := detect(packit.DetectContext{
-				WorkingDir: workingDir,
-			})
-			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Plan).To(Equal(packit.BuildPlan{
-				Provides: []packit.BuildPlanProvision{},
-				Requires: []packit.BuildPlanRequirement{
-					{
-						Name: "cpython",
-						Metadata: pythonstart.BuildPlanMetadata{
-							Launch: true,
-						},
-					},
-					{
-						Name: "site-packages",
-						Metadata: pythonstart.BuildPlanMetadata{
-							Launch: true,
-						},
-					},
-				},
-				Or: []packit.BuildPlan{
-					{
-						Provides: []packit.BuildPlanProvision{},
-						Requires: []packit.BuildPlanRequirement{
-							{
-								Name: "conda-environment",
-								Metadata: pythonstart.BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-						},
-					},
-					{
-						Provides: []packit.BuildPlanProvision{},
-						Requires: []packit.BuildPlanRequirement{
-							{
-								Name: "pixi-environment",
-								Metadata: pythonstart.BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-						},
-					},
-					{
-						Provides: []packit.BuildPlanProvision{},
-						Requires: []packit.BuildPlanRequirement{
-							{
-								Name: "uv-environment",
-								Metadata: pythonstart.BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-						},
-					},
-					{
-						Provides: []packit.BuildPlanProvision{},
-						Requires: []packit.BuildPlanRequirement{
-							{
-								Name: "cpython",
-								Metadata: pythonstart.BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-							{
-								Name: "poetry",
-								Metadata: pythonstart.BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-							{
-								Name: "poetry-venv",
-								Metadata: pythonstart.BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-						},
-					},
-					{
-						Provides: []packit.BuildPlanProvision{},
-						Requires: []packit.BuildPlanRequirement{
-							{
-								Name: "cpython",
-								Metadata: pythonstart.BuildPlanMetadata{
-									Launch: true,
-								},
-							},
-						},
-					},
-				},
-			}))
-		})
-
-		context("when BP_LIVE_RELOAD_ENABLED=true in the build environment", func() {
-			it.Before(func() {
-				err := os.Setenv("BP_LIVE_RELOAD_ENABLED", "true")
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			it.After(func() {
-				err := os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			it("requires watchexec at launch", func() {
+		context("without uv.lock file", func() {
+			it("detects", func() {
 				result, err := detect(packit.DetectContext{
 					WorkingDir: workingDir,
 				})
@@ -159,12 +56,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								Launch: true,
 							},
 						},
-						{
-							Name: "watchexec",
-							Metadata: pythonstart.BuildPlanMetadata{
-								Launch: true,
-							},
-						},
 					},
 					Or: []packit.BuildPlan{
 						{
@@ -176,12 +67,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 										Launch: true,
 									},
 								},
-								{
-									Name: "watchexec",
-									Metadata: pythonstart.BuildPlanMetadata{
-										Launch: true,
-									},
-								},
 							},
 						},
 						{
@@ -189,29 +74,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Requires: []packit.BuildPlanRequirement{
 								{
 									Name: "pixi-environment",
-									Metadata: pythonstart.BuildPlanMetadata{
-										Launch: true,
-									},
-								},
-								{
-									Name: "watchexec",
-									Metadata: pythonstart.BuildPlanMetadata{
-										Launch: true,
-									},
-								},
-							},
-						},
-						{
-							Provides: []packit.BuildPlanProvision{},
-							Requires: []packit.BuildPlanRequirement{
-								{
-									Name: "uv-environment",
-									Metadata: pythonstart.BuildPlanMetadata{
-										Launch: true,
-									},
-								},
-								{
-									Name: "watchexec",
 									Metadata: pythonstart.BuildPlanMetadata{
 										Launch: true,
 									},
@@ -239,12 +101,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 										Launch: true,
 									},
 								},
-								{
-									Name: "watchexec",
-									Metadata: pythonstart.BuildPlanMetadata{
-										Launch: true,
-									},
-								},
 							},
 						},
 						{
@@ -256,16 +112,186 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 										Launch: true,
 									},
 								},
-								{
-									Name: "watchexec",
-									Metadata: pythonstart.BuildPlanMetadata{
-										Launch: true,
-									},
-								},
 							},
 						},
 					},
 				}))
+			})
+		})
+
+		context("with uv.lock file", func() {
+			it.Before(func() {
+				Expect(os.WriteFile(filepath.Join(workingDir, "uv.lock"), []byte{}, os.ModePerm)).To(Succeed())
+
+			})
+
+			it("detects", func() {
+				result, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Plan).To(Equal(packit.BuildPlan{
+					Provides: []packit.BuildPlanProvision{},
+					Requires: []packit.BuildPlanRequirement{
+						{
+							Name: "uv-environment",
+							Metadata: pythonstart.BuildPlanMetadata{
+								Launch: true,
+							},
+						},
+					},
+				}))
+			})
+		})
+
+		context("when BP_LIVE_RELOAD_ENABLED=true in the build environment", func() {
+			it.Before(func() {
+				t.Setenv("BP_LIVE_RELOAD_ENABLED", "true")
+			})
+
+			context("without uv.lock", func() {
+				it("requires watchexec at launch", func() {
+					result, err := detect(packit.DetectContext{
+						WorkingDir: workingDir,
+					})
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result.Plan).To(Equal(packit.BuildPlan{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: "cpython",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+							{
+								Name: "site-packages",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+							{
+								Name: "watchexec",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+						},
+						Or: []packit.BuildPlan{
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "conda-environment",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "watchexec",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+								},
+							},
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "pixi-environment",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "watchexec",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+								},
+							},
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "cpython",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "poetry",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "poetry-venv",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "watchexec",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+								},
+							},
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "cpython",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "watchexec",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+								},
+							},
+						},
+					}))
+				})
+			})
+
+			context("with uv.lock file", func() {
+				it.Before(func() {
+					Expect(os.WriteFile(filepath.Join(workingDir, "uv.lock"), []byte{}, os.ModePerm)).To(Succeed())
+
+				})
+
+				it("detects", func() {
+					result, err := detect(packit.DetectContext{
+						WorkingDir: workingDir,
+					})
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result.Plan).To(Equal(packit.BuildPlan{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: "uv-environment",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+							{
+								Name: "watchexec",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+						},
+					}))
+				})
 			})
 		})
 
@@ -315,6 +341,34 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			it.Before(func() {
 				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte{}, os.ModePerm)).To(Succeed())
+			})
+
+			it("passes detection", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		context("When only a pixi.lock file is present", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(workingDir, "pixi.lock"), []byte{}, os.ModePerm)).To(Succeed())
+			})
+
+			it("passes detection", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		context("When only a uv.lock file is present", func() {
+			it.Before(func() {
+				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(workingDir, "uv.lock"), []byte{}, os.ModePerm)).To(Succeed())
 			})
 
 			it("passes detection", func() {

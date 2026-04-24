@@ -161,7 +161,15 @@ func Detect() packit.DetectFunc {
 			},
 		}
 
-		plans := []packit.BuildPlan{pipPlan, condaPlan, pixiPlan, uvPlan, poetryInstallPlan, simplePlan}
+		plans := []packit.BuildPlan{pipPlan, condaPlan, pixiPlan, poetryInstallPlan, simplePlan}
+
+		// The current build plan from the python buildpack will make an uv project be detected as
+		// a poetry project due to the pyproject.toml presence hence we workaround the issue by only
+		// requiring uv.
+		// Note: this is temporary.
+		if uvLockFile {
+			plans = []packit.BuildPlan{uvPlan}
+		}
 
 		shouldReload, err := checkLiveReloadEnabled()
 		if err != nil {
