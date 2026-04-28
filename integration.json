@@ -4,10 +4,6 @@
     "index.docker.io/paketobuildpacks/ubuntu-noble-builder-buildpackless:latest"
   ],
   "cpython": "index.docker.io/paketobuildpacks/cpython",
-  "pip": "index.docker.io/paketobuildpacks/pip",
-  "pip-install": "index.docker.io/paketobuildpacks/pip-install",
-  "miniconda": "index.docker.io/paketobuildpacks/miniconda",
-  "conda-env-update": "index.docker.io/paketobuildpacks/conda-env-update",
-  "poetry":"index.docker.io/paketobuildpacks/poetry",
-  "poetry-install": "index.docker.io/paketobuildpacks/poetry-install"
+  "python-package-managers-install": "index.docker.io/paketobuildpacks/python-package-managers-install",
+  "python-package-managers-run": "index.docker.io/paketobuildpacks/python-package-managers-run"
 }

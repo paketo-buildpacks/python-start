@@ -15,14 +15,10 @@ import (
 )
 
 var (
-	buildpack               string
-	cpythonBuildpack        string
-	pipBuildpack            string
-	pipInstallBuildpack     string
-	minicondaBuildpack      string
-	condaEnvUpdateBuildpack string
-	poetryBuildpack         string
-	poetryInstallBuildpack  string
+	buildpack                             string
+	cpythonBuildpack                      string
+	pythonPackageManagersRunBuildpack     string
+	pythonPackageManagersInstallBuildpack string
 
 	buildpackInfo struct {
 		Buildpack struct {
@@ -32,13 +28,9 @@ var (
 	}
 
 	config struct {
-		Cpython        string `json:"cpython"`
-		Pip            string `json:"pip"`
-		PipInstall     string `json:"pip-install"`
-		Miniconda      string `json:"miniconda"`
-		CondaEnvUpdate string `json:"conda-env-update"`
-		Poetry         string `json:"poetry"`
-		PoetryInstall  string `json:"poetry-install"`
+		Cpython                      string `json:"cpython"`
+		PythonPackageManagersInstall string `json:"python-package-managers-install"`
+		PythonPackageManagersRun     string `json:"python-package-managers-run"`
 	}
 )
 
@@ -72,28 +64,12 @@ func TestIntegration(t *testing.T) {
 		Execute(config.Cpython)
 	Expect(err).NotTo(HaveOccurred())
 
-	pipBuildpack, err = buildpackStore.Get.
-		Execute(config.Pip)
+	pythonPackageManagersInstallBuildpack, err = buildpackStore.Get.
+		Execute(config.PythonPackageManagersInstall)
 	Expect(err).NotTo(HaveOccurred())
 
-	pipInstallBuildpack, err = buildpackStore.Get.
-		Execute(config.PipInstall)
-	Expect(err).NotTo(HaveOccurred())
-
-	minicondaBuildpack, err = buildpackStore.Get.
-		Execute(config.Miniconda)
-	Expect(err).NotTo(HaveOccurred())
-
-	condaEnvUpdateBuildpack, err = buildpackStore.Get.
-		Execute(config.CondaEnvUpdate)
-	Expect(err).NotTo(HaveOccurred())
-
-	poetryBuildpack, err = buildpackStore.Get.
-		Execute(config.Poetry)
-	Expect(err).NotTo(HaveOccurred())
-
-	poetryInstallBuildpack, err = buildpackStore.Get.
-		Execute(config.PoetryInstall)
+	pythonPackageManagersRunBuildpack, err = buildpackStore.Get.
+		Execute(config.PythonPackageManagersRun)
 	Expect(err).NotTo(HaveOccurred())
 
 	SetDefaultEventuallyTimeout(30 * time.Second)
