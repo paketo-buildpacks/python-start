@@ -17,7 +17,14 @@ type BuildPlanMetadata struct {
 	// Launch flag requests the given requirement be made available during the
 	// launch phase of the buildpack lifecycle.
 	Launch bool `toml:"launch"`
+	Build  bool `toml:"build"`
 }
+
+const (
+	LiveReloadEnv            = "BP_LIVE_RELOAD_ENABLED"
+	PackageManagersEnv       = "BP_ENABLE_PACKAGE_MANAGERS"
+	PackageManagersPlanEntry = "package-managers-run"
+)
 
 // Detect will return a packit.DetectFunc that will be invoked during the
 // detect phase of the buildpack lifecycle.
@@ -186,6 +193,22 @@ func Detect() packit.DetectFunc {
 				})
 			}
 		}
+
+		shouldUsePackageManagers, err := checkShouldEnablePackageManagers()
+		if err != nil {
+			return packit.DetectResult{}, err
+		}
+		if shouldUsePackageManagers {
+			for i := range plans {
+				plans[i].Requires = append(plans[i].Requires, packit.BuildPlanRequirement{
+					Name: PackageManagersPlanEntry,
+					Metadata: BuildPlanMetadata{
+						Build: true,
+					},
+				})
+			}
+		}
+
 		return packit.DetectResult{
 			Plan: or(plans...),
 		}, nil
@@ -193,7 +216,7 @@ func Detect() packit.DetectFunc {
 }
 
 func checkLiveReloadEnabled() (bool, error) {
-	if reload, ok := os.LookupEnv("BP_LIVE_RELOAD_ENABLED"); ok {
+	if reload, ok := os.LookupEnv(LiveReloadEnv); ok {
 		shouldEnableReload, err := strconv.ParseBool(reload)
 		if err != nil {
 			return false, fmt.Errorf("failed to parse BP_LIVE_RELOAD_ENABLED value %s: %w", reload, err)
@@ -201,6 +224,19 @@ func checkLiveReloadEnabled() (bool, error) {
 		return shouldEnableReload, nil
 	}
 	return false, nil
+}
+
+func checkShouldEnablePackageManagers() (bool, error) {
+	shouldUsePackageManagers := false
+
+	if usePackageManagers, ok := os.LookupEnv(PackageManagersEnv); ok {
+		shouldUsePackageManagers, err := strconv.ParseBool(usePackageManagers)
+		if err != nil {
+			return false, fmt.Errorf("failed to parse %s value %s: %w", PackageManagersEnv, usePackageManagers, err)
+		}
+		return shouldUsePackageManagers, nil
+	}
+	return shouldUsePackageManagers, nil
 }
 
 func or(plans ...packit.BuildPlan) packit.BuildPlan {
