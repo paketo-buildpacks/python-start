@@ -20,6 +20,9 @@ var (
 	pythonPackageManagersRunBuildpack     string
 	pythonPackageManagersInstallBuildpack string
 
+	minicondaBuildpack      string
+	condaEnvUpdateBuildpack string
+
 	buildpackInfo struct {
 		Buildpack struct {
 			ID   string
@@ -31,6 +34,9 @@ var (
 		Cpython                      string `json:"cpython"`
 		PythonPackageManagersInstall string `json:"python-package-managers-install"`
 		PythonPackageManagersRun     string `json:"python-package-managers-run"`
+
+		Miniconda      string `json:"miniconda"`
+		CondaEnvUpdate string `json:"conda-env-update"`
 	}
 )
 
@@ -72,9 +78,18 @@ func TestIntegration(t *testing.T) {
 		Execute(config.PythonPackageManagersRun)
 	Expect(err).NotTo(HaveOccurred())
 
+	minicondaBuildpack, err = buildpackStore.Get.
+		Execute(config.Miniconda)
+	Expect(err).NotTo(HaveOccurred())
+
+	condaEnvUpdateBuildpack, err = buildpackStore.Get.
+		Execute(config.CondaEnvUpdate)
+	Expect(err).NotTo(HaveOccurred())
+
 	SetDefaultEventuallyTimeout(30 * time.Second)
 
 	suite := spec.New("Integration", spec.Report(report.Terminal{}), spec.Parallel())
 	suite("Default", testDefault)
+	suite("Use python-package-managers", testUsePythonPackageManager)
 	suite.Run(t)
 }

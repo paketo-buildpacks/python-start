@@ -122,7 +122,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		context("with uv.lock file", func() {
 			it.Before(func() {
 				Expect(os.WriteFile(filepath.Join(workingDir, "uv.lock"), []byte{}, os.ModePerm)).To(Succeed())
-
 			})
 
 			it("detects", func() {
@@ -146,7 +145,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		context("when BP_LIVE_RELOAD_ENABLED=true in the build environment", func() {
 			it.Before(func() {
-				t.Setenv("BP_LIVE_RELOAD_ENABLED", "true")
+				t.Setenv(pythonstart.LiveReloadEnv, "true")
 			})
 
 			context("without uv.lock", func() {
@@ -295,6 +294,157 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			})
 		})
 
+		context("when BP_ENABLE_PACKAGE_MANAGERS=true in the build environment", func() {
+			it.Before(func() {
+				t.Setenv(pythonstart.PackageManagersEnv, "true")
+			})
+
+			context("without uv.lock", func() {
+				it("requires watchexec at launch", func() {
+					result, err := detect(packit.DetectContext{
+						WorkingDir: workingDir,
+					})
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result.Plan).To(Equal(packit.BuildPlan{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: "cpython",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+							{
+								Name: "site-packages",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+							{
+								Name: pythonstart.PackageManagersPlanEntry,
+								Metadata: pythonstart.BuildPlanMetadata{
+									Build: true,
+								},
+							},
+						},
+						Or: []packit.BuildPlan{
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "conda-environment",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: pythonstart.PackageManagersPlanEntry,
+										Metadata: pythonstart.BuildPlanMetadata{
+											Build: true,
+										},
+									},
+								},
+							},
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "pixi-environment",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: pythonstart.PackageManagersPlanEntry,
+										Metadata: pythonstart.BuildPlanMetadata{
+											Build: true,
+										},
+									},
+								},
+							},
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "cpython",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "poetry",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "poetry-venv",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: pythonstart.PackageManagersPlanEntry,
+										Metadata: pythonstart.BuildPlanMetadata{
+											Build: true,
+										},
+									},
+								},
+							},
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "cpython",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: pythonstart.PackageManagersPlanEntry,
+										Metadata: pythonstart.BuildPlanMetadata{
+											Build: true,
+										},
+									},
+								},
+							},
+						},
+					}))
+				})
+			})
+
+			context("with uv.lock file", func() {
+				it.Before(func() {
+					Expect(os.WriteFile(filepath.Join(workingDir, "uv.lock"), []byte{}, os.ModePerm)).To(Succeed())
+
+				})
+
+				it("detects", func() {
+					result, err := detect(packit.DetectContext{
+						WorkingDir: workingDir,
+					})
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result.Plan).To(Equal(packit.BuildPlan{
+						Provides: []packit.BuildPlanProvision{},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: "uv-environment",
+								Metadata: pythonstart.BuildPlanMetadata{
+									Launch: true,
+								},
+							},
+							{
+								Name: pythonstart.PackageManagersPlanEntry,
+								Metadata: pythonstart.BuildPlanMetadata{
+									Build: true,
+								},
+							},
+						},
+					}))
+				})
+			})
+		})
+
 		context("When only an environment.yml file is present", func() {
 			it.Before(func() {
 				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
@@ -396,13 +546,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	context("failure cases", func() {
 		context("when BP_LIVE_RELOAD_ENABLED is set to an invalid value", func() {
 			it.Before(func() {
-				err := os.Setenv("BP_LIVE_RELOAD_ENABLED", "not-a-bool")
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			it.After(func() {
-				err := os.Unsetenv("BP_LIVE_RELOAD_ENABLED")
-				Expect(err).NotTo(HaveOccurred())
+				t.Setenv(pythonstart.LiveReloadEnv, "not-a-bool")
 			})
 
 			it("returns an error", func() {
@@ -410,6 +554,19 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					WorkingDir: workingDir,
 				})
 				Expect(err).To(MatchError(ContainSubstring("failed to parse BP_LIVE_RELOAD_ENABLED value not-a-bool")))
+			})
+		})
+
+		context("when BP_ENABLE_PACKAGE_MANAGERS is set to an invalid value", func() {
+			it.Before(func() {
+				t.Setenv(pythonstart.PackageManagersEnv, "not-a-bool")
+			})
+
+			it("returns an error", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).To(MatchError(ContainSubstring("failed to parse BP_ENABLE_PACKAGE_MANAGERS value not-a-bool")))
 			})
 		})
 

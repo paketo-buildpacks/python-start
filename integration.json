@@ -5,5 +5,8 @@
   ],
   "cpython": "index.docker.io/paketobuildpacks/cpython",
   "python-package-managers-install": "index.docker.io/paketobuildpacks/python-package-managers-install",
-  "python-package-managers-run": "index.docker.io/paketobuildpacks/python-package-managers-run"
+  "python-package-managers-run": "index.docker.io/paketobuildpacks/python-package-managers-run",
+
+  "miniconda": "index.docker.io/paketobuildpacks/miniconda",
+  "conda-env-update": "index.docker.io/paketobuildpacks/conda-env-update"
 }
