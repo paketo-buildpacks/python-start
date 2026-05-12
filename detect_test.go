@@ -62,6 +62,29 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Provides: []packit.BuildPlanProvision{},
 							Requires: []packit.BuildPlanRequirement{
 								{
+									Name: "cpython",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+								{
+									Name: "site-packages",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+								{
+									Name: "pipenv",
+									Metadata: pythonstart.BuildPlanMetadata{
+										Launch: true,
+									},
+								},
+							},
+						},
+						{
+							Provides: []packit.BuildPlanProvision{},
+							Requires: []packit.BuildPlanRequirement{
+								{
 									Name: "conda-environment",
 									Metadata: pythonstart.BuildPlanMetadata{
 										Launch: true,
@@ -177,6 +200,35 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							},
 						},
 						Or: []packit.BuildPlan{
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "cpython",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "site-packages",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "pipenv",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "watchexec",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+								},
+							},
 							{
 								Provides: []packit.BuildPlanProvision{},
 								Requires: []packit.BuildPlanRequirement{
@@ -328,6 +380,35 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							},
 						},
 						Or: []packit.BuildPlan{
+							{
+								Provides: []packit.BuildPlanProvision{},
+								Requires: []packit.BuildPlanRequirement{
+									{
+										Name: "cpython",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "site-packages",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: "pipenv",
+										Metadata: pythonstart.BuildPlanMetadata{
+											Launch: true,
+										},
+									},
+									{
+										Name: pythonstart.PackageManagersPlanEntry,
+										Metadata: pythonstart.BuildPlanMetadata{
+											Build: true,
+										},
+									},
+								},
+							},
 							{
 								Provides: []packit.BuildPlanProvision{},
 								Requires: []packit.BuildPlanRequirement{
@@ -538,7 +619,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				_, err := detect(packit.DetectContext{
 					WorkingDir: workingDir,
 				})
-				Expect(err).To(MatchError(ContainSubstring("No *.py, environment.yml, pixi.lock, requirements.txt, uv.lock, pyproject.toml, or package-list.txt found")))
+				Expect(err).To(MatchError(ContainSubstring("No *.py, environment.yml, pixi.lock, requirements.txt, uv.lock, Pipfile.lock, pyproject.toml, or package-list.txt found")))
 			})
 		})
 	})
