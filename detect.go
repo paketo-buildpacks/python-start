@@ -64,6 +64,11 @@ func Detect() packit.DetectFunc {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat uv.lock: %w", err)
 		}
 
+		pipenvLockFile, err := fs.Exists(filepath.Join(context.WorkingDir, "Pipfile.lock"))
+		if err != nil {
+			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat Pipfile.lock: %w", err)
+		}
+
 		pyprojectTOMLFile, err := fs.Exists(filepath.Join(context.WorkingDir, "pyproject.toml"))
 		if err != nil {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to stat pyproject.toml: %w", err)
@@ -74,8 +79,15 @@ func Detect() packit.DetectFunc {
 			return packit.DetectResult{}, packit.Fail.WithMessage("failed trying to find *.py files: %w", err)
 		}
 
-		if !envFile && !pixiEnvFile && !requirementsFile && !lockFile && !uvLockFile && !pyprojectTOMLFile && len(pythonFiles) < 1 {
-			return packit.DetectResult{}, packit.Fail.WithMessage("No *.py, environment.yml, pixi.lock, requirements.txt, uv.lock, pyproject.toml, or package-list.txt found")
+		if !envFile &&
+			!pixiEnvFile &&
+			!requirementsFile &&
+			!lockFile &&
+			!uvLockFile &&
+			!pipenvLockFile &&
+			!pyprojectTOMLFile &&
+			len(pythonFiles) < 1 {
+			return packit.DetectResult{}, packit.Fail.WithMessage("No *.py, environment.yml, pixi.lock, requirements.txt, uv.lock, Pipfile.lock, pyproject.toml, or package-list.txt found")
 		}
 
 		simplePlan := packit.BuildPlan{
@@ -144,6 +156,30 @@ func Detect() packit.DetectFunc {
 			},
 		}
 
+		pipenvPlan := packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{},
+			Requires: []packit.BuildPlanRequirement{
+				{
+					Name: "cpython",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+				{
+					Name: "site-packages",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+				{
+					Name: "pipenv",
+					Metadata: BuildPlanMetadata{
+						Launch: true,
+					},
+				},
+			},
+		}
+
 		poetryInstallPlan := packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{},
 			Requires: []packit.BuildPlanRequirement{
@@ -168,7 +204,7 @@ func Detect() packit.DetectFunc {
 			},
 		}
 
-		plans := []packit.BuildPlan{pipPlan, condaPlan, pixiPlan, poetryInstallPlan, simplePlan}
+		plans := []packit.BuildPlan{pipPlan, pipenvPlan, condaPlan, pixiPlan, poetryInstallPlan, simplePlan}
 
 		// The current build plan from the python buildpack will make an uv project be detected as
 		// a poetry project due to the pyproject.toml presence hence we workaround the issue by only
