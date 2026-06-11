@@ -50,6 +50,7 @@ func testUsePythonPackageManager(t *testing.T, context spec.G, it spec.S) {
 				Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
 				Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
 			})
+
 			it("builds an oci image with conda-environment", func() {
 				var err error
 				source, err = sourceWithCode(filepath.Join("testdata", "conda_app"))
@@ -66,6 +67,44 @@ func testUsePythonPackageManager(t *testing.T, context spec.G, it spec.S) {
 					WithEnv(map[string]string{
 						"BP_ENABLE_PACKAGE_MANAGERS": "true",
 					}).
+					Execute(name, source)
+				Expect(err).NotTo(HaveOccurred(), logs.String())
+
+				Expect(logs).To(ContainLines(
+					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
+					"  Assigning launch processes:",
+					"    web (default): python",
+				))
+
+				container, err = docker.Container.Run.
+					WithTTY().
+					Execute(image.ID)
+				Expect(err).NotTo(HaveOccurred())
+
+				Eventually(func() string {
+					cLogs, err := docker.Container.Logs.Execute(container.ID)
+					Expect(err).NotTo(HaveOccurred())
+					return cLogs.String()
+				}).Should(
+					And(
+						MatchRegexp(`Python 3\.\d+\.\d+`),
+						ContainSubstring(`Type "help", "copyright", "credits" or "license" for more information.`),
+					),
+				)
+			})
+
+			it("builds an oci image with python launch command", func() {
+				var err error
+				source, err = occam.Source(filepath.Join("testdata", "default_app"))
+				Expect(err).NotTo(HaveOccurred())
+
+				var logs fmt.Stringer
+				image, logs, err = pack.WithNoColor().Build.
+					WithPullPolicy("never").
+					WithBuildpacks(
+						cpythonBuildpack,
+						buildpack,
+					).
 					Execute(name, source)
 				Expect(err).NotTo(HaveOccurred(), logs.String())
 
