@@ -481,12 +481,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 											Launch: true,
 										},
 									},
-									{
-										Name: pythonstart.PackageManagersPlanEntry,
-										Metadata: pythonstart.BuildPlanMetadata{
-											Build: true,
-										},
-									},
 								},
 							},
 						},

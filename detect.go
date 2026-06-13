@@ -236,6 +236,10 @@ func Detect() packit.DetectFunc {
 		}
 		if shouldUsePackageManagers {
 			for i := range plans {
+				// Simple plan does not use package-managers
+				if len(plans) > 1 && i == len(plans) - 1 {
+					continue
+				}
 				plans[i].Requires = append(plans[i].Requires, packit.BuildPlanRequirement{
 					Name: PackageManagersPlanEntry,
 					Metadata: BuildPlanMetadata{
