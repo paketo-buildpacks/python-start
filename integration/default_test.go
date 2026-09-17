@@ -405,5 +405,50 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				),
 			)
 		})
+
+		context("when BP_LAUNCH_WITH_TINI=true", func() {
+			it("uses tini to launch the python process", func() {
+				var err error
+				source, err = sourceWithCode(filepath.Join("testdata", "default_app"))
+				Expect(err).NotTo(HaveOccurred())
+
+				var logs fmt.Stringer
+				image, logs, err = pack.Build.
+					WithPullPolicy("never").
+					WithBuildpacks(
+						cpythonBuildpack,
+						tiniBuildpack,
+						buildpack,
+					).
+					WithEnv(map[string]string{
+						"BP_LAUNCH_WITH_TINI": "true",
+					}).
+					Execute(name, source)
+				Expect(err).ToNot(HaveOccurred(), logs.String)
+
+				Expect(logs).To(ContainLines(
+					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
+					"  Using tini for process launching",
+					"  Assigning launch processes:",
+					"    web (default): tini -g -- python",
+				))
+
+				container, err = docker.Container.Run.
+					WithTTY().
+					Execute(image.ID)
+				Expect(err).NotTo(HaveOccurred())
+
+				Eventually(func() string {
+					cLogs, err := docker.Container.Logs.Execute(container.ID)
+					Expect(err).NotTo(HaveOccurred())
+					return cLogs.String()
+				}).Should(
+					And(
+						MatchRegexp(`Python 3\.\d+\.\d+`),
+						ContainSubstring(`Type "help", "copyright", "credits" or "license" for more information.`),
+					),
+				)
+			})
+		})
 	})
 }

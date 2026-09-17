@@ -20,12 +20,6 @@ type BuildPlanMetadata struct {
 	Build  bool `toml:"build"`
 }
 
-const (
-	LiveReloadEnv            = "BP_LIVE_RELOAD_ENABLED"
-	PackageManagersEnv       = "BP_ENABLE_PACKAGE_MANAGERS"
-	PackageManagersPlanEntry = "package-managers-run"
-)
-
 // Detect will return a packit.DetectFunc that will be invoked during the
 // detect phase of the buildpack lifecycle.
 //
@@ -93,114 +87,54 @@ func Detect() packit.DetectFunc {
 		simplePlan := packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{},
 			Requires: []packit.BuildPlanRequirement{
-				{
-					Name: "cpython",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
+				NewLaunchRequirement(CPython),
 			},
 		}
 
 		pipPlan := packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{},
 			Requires: []packit.BuildPlanRequirement{
-				{
-					Name: "cpython",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
-				{
-					Name: "site-packages",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
+				NewLaunchRequirement(CPython),
+				NewLaunchRequirement(SitePackages),
 			},
 		}
 
 		condaPlan := packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{},
 			Requires: []packit.BuildPlanRequirement{
-				{
-					Name: "conda-environment",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
+				NewLaunchRequirement(CondaEnv),
 			},
 		}
 
 		pixiPlan := packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{},
 			Requires: []packit.BuildPlanRequirement{
-				{
-					Name: "pixi-environment",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
+				NewLaunchRequirement(PixiEnv),
 			},
 		}
 
 		uvPlan := packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{},
 			Requires: []packit.BuildPlanRequirement{
-				{
-					Name: "uv-environment",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
+				NewLaunchRequirement(UvEnv),
 			},
 		}
 
 		pipenvPlan := packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{},
 			Requires: []packit.BuildPlanRequirement{
-				{
-					Name: "cpython",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
-				{
-					Name: "site-packages",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
-				{
-					Name: "pipenv",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
+				NewLaunchRequirement(CPython),
+				NewLaunchRequirement(SitePackages),
+				NewLaunchRequirement(PipEnv),
 			},
 		}
 
 		poetryInstallPlan := packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{},
 			Requires: []packit.BuildPlanRequirement{
-				{
-					Name: "cpython",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
-				{
-					Name: "poetry",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
-				{
-					Name: "poetry-venv",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				},
+				NewLaunchRequirement(CPython),
+				NewLaunchRequirement(Poetry),
+				NewLaunchRequirement(PoetryVenv),
 			},
 		}
 
@@ -214,38 +148,34 @@ func Detect() packit.DetectFunc {
 			plans = []packit.BuildPlan{uvPlan}
 		}
 
-		shouldReload, err := checkLiveReloadEnabled()
-		if err != nil {
+		if shouldReload, err := isEnvVarTrue(LiveReloadEnvName); err != nil {
 			return packit.DetectResult{}, err
-		}
-
-		if shouldReload {
+		} else if shouldReload {
 			for i := range plans {
-				plans[i].Requires = append(plans[i].Requires, packit.BuildPlanRequirement{
-					Name: "watchexec",
-					Metadata: BuildPlanMetadata{
-						Launch: true,
-					},
-				})
+				plans[i].Requires = append(plans[i].Requires,
+					NewLaunchRequirement(WatchExec))
 			}
 		}
 
-		shouldUsePackageManagers, err := checkShouldEnablePackageManagers()
-		if err != nil {
+		if shouldUsePackageManagers, err := isEnvVarTrue(PackageManagersEnvName); err != nil {
 			return packit.DetectResult{}, err
-		}
-		if shouldUsePackageManagers {
+		} else if shouldUsePackageManagers {
 			for i := range plans {
 				// Simple plan does not use package-managers
-				if len(plans) > 1 && i == len(plans) - 1 {
+				if len(plans) > 1 && i == len(plans)-1 {
 					continue
 				}
-				plans[i].Requires = append(plans[i].Requires, packit.BuildPlanRequirement{
-					Name: PackageManagersPlanEntry,
-					Metadata: BuildPlanMetadata{
-						Build: true,
-					},
-				})
+				plans[i].Requires = append(plans[i].Requires,
+					NewBuildRequirement(PackageManagersPlanEntry))
+			}
+		}
+
+		if shouldLaunchWithTini, err := isEnvVarTrue(LaunchWithTiniEnvName); err != nil {
+			return packit.DetectResult{}, err
+		} else if shouldLaunchWithTini {
+			for i := range plans {
+				plans[i].Requires = append(plans[i].Requires,
+					NewLaunchRequirement(Tini))
 			}
 		}
 
@@ -255,28 +185,33 @@ func Detect() packit.DetectFunc {
 	}
 }
 
-func checkLiveReloadEnabled() (bool, error) {
-	if reload, ok := os.LookupEnv(LiveReloadEnv); ok {
-		shouldEnableReload, err := strconv.ParseBool(reload)
-		if err != nil {
-			return false, fmt.Errorf("failed to parse BP_LIVE_RELOAD_ENABLED value %s: %w", reload, err)
-		}
-		return shouldEnableReload, nil
+func NewBuildRequirement(name string) packit.BuildPlanRequirement {
+	return packit.BuildPlanRequirement{
+		Name: name,
+		Metadata: BuildPlanMetadata{
+			Build: true,
+		},
 	}
-	return false, nil
 }
 
-func checkShouldEnablePackageManagers() (bool, error) {
-	shouldUsePackageManagers := false
-
-	if usePackageManagers, ok := os.LookupEnv(PackageManagersEnv); ok {
-		shouldUsePackageManagers, err := strconv.ParseBool(usePackageManagers)
-		if err != nil {
-			return false, fmt.Errorf("failed to parse %s value %s: %w", PackageManagersEnv, usePackageManagers, err)
-		}
-		return shouldUsePackageManagers, nil
+func NewLaunchRequirement(name string) packit.BuildPlanRequirement {
+	return packit.BuildPlanRequirement{
+		Name: name,
+		Metadata: BuildPlanMetadata{
+			Launch: true,
+		},
 	}
-	return shouldUsePackageManagers, nil
+}
+
+func isEnvVarTrue(varName string) (bool, error) {
+	if value, found := os.LookupEnv(varName); found {
+		enable, err := strconv.ParseBool(value)
+		if err != nil {
+			return false, fmt.Errorf("failed to parse %s value %s: %w", varName, value, err)
+		}
+		return enable, nil
+	}
+	return false, nil
 }
 
 func or(plans ...packit.BuildPlan) packit.BuildPlan {

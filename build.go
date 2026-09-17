@@ -13,14 +13,31 @@ func Build(logger scribe.Emitter) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 
-		processes := []packit.Process{
-			{
-				Type:    "web",
-				Command: "python",
+		enableTini, err := isEnvVarTrue(LaunchWithTiniEnvName)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
+		var originalProcess packit.Process
+		if enableTini {
+			originalProcess = packit.Process{
+				Type:    Web,
+				Command: Tini,
+				Args:    []string{"-g", "--", Python},
 				Default: true,
 				Direct:  true,
-			},
+			}
+			logger.Process("Using tini for process launching")
+		} else {
+			originalProcess = packit.Process{
+				Type:    Web,
+				Command: Python,
+				Default: true,
+				Direct:  true,
+			}
 		}
+
+		processes := []packit.Process{originalProcess}
 
 		logger.LaunchProcesses(processes)
 
