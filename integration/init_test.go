@@ -22,6 +22,7 @@ var (
 
 	minicondaBuildpack      string
 	condaEnvUpdateBuildpack string
+	tiniBuildpack           string
 
 	buildpackInfo struct {
 		Buildpack struct {
@@ -37,6 +38,7 @@ var (
 
 		Miniconda      string `json:"miniconda"`
 		CondaEnvUpdate string `json:"conda-env-update"`
+		Tini           string `json:"tini"`
 	}
 )
 
@@ -84,6 +86,10 @@ func TestIntegration(t *testing.T) {
 
 	condaEnvUpdateBuildpack, err = buildpackStore.Get.
 		Execute(config.CondaEnvUpdate)
+	Expect(err).NotTo(HaveOccurred())
+
+	tiniBuildpack, err = buildpackStore.Get.
+		Execute(config.Tini)
 	Expect(err).NotTo(HaveOccurred())
 
 	SetDefaultEventuallyTimeout(30 * time.Second)
